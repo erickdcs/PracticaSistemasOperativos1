@@ -8,7 +8,7 @@ typedef struct {
 
 void startUp();
 unsigned char[1024] startRAM();
-void accessMemory();
+void accessMemory(FILE* f);
 
 
 
@@ -46,4 +46,16 @@ int main(int argc, char** argv){
 	
 	
 	
+}
+
+void startUp(T_LINEA_CACHE cache[4], unsigned char ram[1024]){
+	ram = startRam();
+	int i;
+	int j;
+	for(i=0; i < 4; i++){
+		cache[i].ETQ = 0xFF;
+		for(j = 0; j < 8; j++){
+			cache[i].Datos[j] = 0;
+		}
+	}
 }
