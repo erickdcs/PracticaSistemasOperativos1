@@ -10,7 +10,7 @@ typedef struct {
 } T_LINEA_CACHE;
 
 void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAccesos);
-unsigned char* startRAM(FILE* f);
+unsigned char[1024] startRAM(FILE* f);
 short int accesoMemoria(FILE* f);
 short int numLinea(short int direccion);
 short int etiqueta(short int direccion);
@@ -135,4 +135,26 @@ int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
 	}else{
 		return 0;
 	}
+}
+unsigned char[1024] startRAM(FILE *fichero){
+	char linea[1024];	//	array de char donde se almacenara la informacion
+	fichero = fopen("RAM.bin", "r");	// abrimos el fichero
+	int cont = 0;	// contador para avanzar la posicion del array
+	char c = 0;	//char auxiliar
+	c = getc(fichero);// cargamos el primer caracter en c
+
+	/// este bucle lee caracter por caracter hasta que se llegue al final del fichero
+	while(!feof(fichero))
+	{
+		
+		if(c != '\r' && c != '\0')
+		{
+			linea[cont] = c;
+			cont++;
+		}
+		c =getc(fichero);
+	}
+	
+	fclose(fichero);
+	return linea;
 }
