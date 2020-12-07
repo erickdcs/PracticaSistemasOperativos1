@@ -15,9 +15,12 @@ short int accesoMemoria(FILE* f);
 short int numLinea(short int direccion);
 short int etiqueta(short int direccion);
 short int palabra(short int direccion);
+short int bloque(short int direccion);
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
+void falloCache(T_LINEA_CACHE* cache);
 
-
+unsigned int tiempoGlobal = 0;
+unsigned int numFallos = 0;
 
 
 
@@ -30,8 +33,7 @@ int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
 
 
 int main(int argc, char** argv){
-	int tiempoGlobal = 0;
-	int numFallos = 0;
+	
 	T_LINEA_CACHE cache[4];
 	unsigned char ram[1024];
 	short int* siguienteAcceso;
@@ -129,7 +131,11 @@ short int etiqueta(short int direccion){ //Mantiene exclusivamente los bits de l
 short int palabra(short int direccion){ //Mantiene exclusivamente los bits de la palabra, después los desplaza para que ocupen los bits de menor peso
 	return (direccion & 0b0000011111);
 }
-int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){ 
+short int bloque(short int direccion){
+	return ((direccion & 0b1111100000) >> 5);
+}
+int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
+		tiempoGlobal++;
 	if(cache[numLinea(direccion)].ETQ == etiqueta(direccion)){ //Comprueba si la etiqueta de la direccion se corresponde con la etiqueta cargada en 
 		return 1;											  //la linea correspondiente de la cache
 	}else{
@@ -157,4 +163,17 @@ unsigned char* startRAM(FILE *fichero){
 	
 	fclose(fichero);
 	return linea;
+}
+void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
+	tiempoGlobal+=10;
+	numFallos++;
+	short int linea = numLinea(direccion);
+	short int bloque = bloqu(direccion);
+	int i;
+	printf("T: %d, Fallo de CACHE %d, ADDR %04X ETQ %X", tiempoGlobal, numFallos, direccion,etiqueta(direccion));
+	printf(" linea %02X palabra %02X bloque %02X", linea, palabra(direccion), bloque);
+	cache[linea].ETQ = etiqueta(direccion);
+	for (i = 0; i < 8; i++){
+		cache[linea].Datos[i] = ram[bloque+i];
+	}
 }
