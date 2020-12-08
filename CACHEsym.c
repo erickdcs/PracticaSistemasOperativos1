@@ -184,12 +184,13 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	}
 }
 
-void imprimirCache(T_LINEA_CACHE cache){
-	int i  =0;
-	while(i<4){
-		printf("ETQ: %x",cache.ETQ);
-		for(int j = 7; j>0;j--){
-			printf("Datos: %x", cache.Datos[j]);
+void imprimirCache(T_LINEA_CACHE *cache){
+	int i;
+	for(i = 0; i<4; i++){
+		printf("ETQ: %x",cache[i].ETQ);
+		for(int j = 7; j>=0;j--){
+			printf("Datos: %x", cache[i].Datos[j]);
 		}
+		printf("\n");		
 	}
 }
