@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <unistd.h>
 typedef struct {
  short int ETQ;
  short int Datos[8];
@@ -18,56 +19,40 @@ short int palabra(short int direccion);
 short int numBloque(short int direccion);
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
+char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
 
 unsigned int tiempoGlobal = 0;
 unsigned int numFallos = 0;
-
-
-
-
-
-
-
-
-
-
 
 int main(int argc, char** argv){
 	
 	T_LINEA_CACHE cache[4];
 	unsigned char ram[1024];
-	short int siguienteAcceso;
+	short int siguienteAcceso = 0;
 	FILE* fRAM;
 	FILE* fAccesos;
 	char texto[100];
+	int cantidad = 0;
 	
 	startUp(cache, ram, fRAM, fAccesos);
 	printf("\nMemoria iniciada");
 	fAccesos = fopen("accesos_memoria.txt", "r");
-	siguienteAcceso = accesoMemoria(fAccesos);
-	if (cargadoEnCache(siguienteAcceso, cache)==0){
-		falloCache(siguienteAcceso,cache,ram);
-	}else{
-		printf("Esta cargado en cache");
+	
+	while(siguienteAcceso!=-1){
+		siguienteAcceso = accesoMemoria(fAccesos);
+		
+		if(siguienteAcceso == -1){
+			printf("\nSe ha acabado de leer las direcciones de memoria");
+			printf("\nTexto: %s", texto);
+		}else{
+			if (cargadoEnCache(siguienteAcceso, cache)==0){
+				falloCache(siguienteAcceso,cache,ram);
+			}else{
+				texto[cantidad] = aciertoCache(siguienteAcceso, cache, ram);
+				cantidad++;
+			}
+		}
 	}
-	
-	
-	
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	return 0;
 }
 
@@ -117,8 +102,8 @@ short int accesoMemoria(FILE* fAccesos){
 	short int direccion = 0;
 	char aux[4] = "\n";
 	
-	if(fAccesos == NULL) exit(-1);
-	fread(aux,4,1,fAccesos); //Lee los 4 primeros bytes que encuentra en el fichero y los almacena en formato string 
+	if(feof(fAccesos)) return(-1);
+	fread(aux,4,1,fAccesos); //Lee los 4 primeros bytes que encuentra en el fichero y los almacena en formato string	
 	printf("\n Direccion leida: %s", aux);
 	direccion = (short int)strtol(aux,NULL,16); //Convierte el string a formato numérico (teniendo en cuenta que estaban en base 16)
 	aux[0] = getc(fAccesos); //Desecha el siguiente caracter "\n" contiguo a cada direccion 
@@ -148,7 +133,7 @@ int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
 	}
 }
 unsigned char* startRAM(FILE *fichero){
-	
+	unsigned char* ram;
 	unsigned char linea[1024];	//	array de char donde se almacenara la informacion
 	fichero = fopen("RAM.bin", "r");	// abrimos el fichero
 	int cont = 0;	// contador para avanzar la posicion del array
@@ -168,13 +153,15 @@ unsigned char* startRAM(FILE *fichero){
 	}
 	
 	fclose(fichero);
-	return linea;
+	ram = linea;
+	return ram;
 }
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	numFallos++;
 	short int linea = numLinea(direccion);
 	short int bloque = numBloque(direccion);
 	int i;
+	sleep(2);
 	printf("T: %d, Fallo de CACHE %d, ADDR %04X ETQ %X", tiempoGlobal, numFallos, direccion,etiqueta(direccion));
 	printf(" linea %02X palabra %02X bloque %02X", linea, palabra(direccion), bloque);
 	tiempoGlobal+=10;
@@ -183,7 +170,12 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 		cache[linea].Datos[i] = ram[bloque+i];
 	}
 }
-
+char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
+	sleep(2);
+	printf("T: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
+	printf(" linea %02X palabra %02X DATO %02X", numLinea(direccion), palabra(direccion), ram[direccion]);
+	return ram[direccion];
+}
 void imprimirCache(T_LINEA_CACHE cache){
 	int i  =0;
 	while(i<4){
