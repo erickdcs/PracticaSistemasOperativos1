@@ -170,7 +170,12 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 		cache[linea].Datos[i] = ram[bloque+i];
 	}
 }
-
+char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
+	sleep(2);
+	printf("T: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
+	printf(" linea %02X palabra %02X DATO %02X", numLinea(direccion), palabra(direccion), ram[direccion]);
+	return ram[direccion];
+}
 void imprimirCache(T_LINEA_CACHE *cache){
 	int i;
 	for(i = 0; i<4; i++){
