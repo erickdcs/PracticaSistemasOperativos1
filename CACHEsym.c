@@ -183,3 +183,13 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 		cache[linea].Datos[i] = ram[bloque+i];
 	}
 }
+
+void imprimirCache(T_LINEA_CACHE cache){
+	int i  =0;
+	while(i<4){
+		printf("ETQ: %x",cache.ETQ);
+		for(int j = 8; j>0;j--){
+			printf("Datos: %x", cache.Datos[j]);
+		}
+	}
+}
