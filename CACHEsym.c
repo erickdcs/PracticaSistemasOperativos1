@@ -188,7 +188,7 @@ void imprimirCache(T_LINEA_CACHE cache){
 	int i  =0;
 	while(i<4){
 		printf("ETQ: %x",cache.ETQ);
-		for(int j = 8; j>0;j--){
+		for(int j = 7; j>0;j--){
 			printf("Datos: %x", cache.Datos[j]);
 		}
 	}
