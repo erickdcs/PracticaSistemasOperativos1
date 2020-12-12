@@ -20,6 +20,7 @@ short int numBloque(short int direccion);
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
 char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
+void imprimirCache(T_LINEA_CACHE *cache);
 
 unsigned int tiempoGlobal = 0;
 unsigned int numFallos = 0;
@@ -33,6 +34,7 @@ int main(int argc, char** argv){
 	FILE* fAccesos;
 	char texto[100];
 	int cantidad = 0;
+	int numAccesos = 0;
 	int i;
 	
 	//Abrimos los ficheros en formato lectura
@@ -55,7 +57,9 @@ int main(int argc, char** argv){
 		siguienteAcceso = accesoMemoria(fAccesos);
 		
 		if(siguienteAcceso == -1){
-			printf("\nSe ha acabado de leer las direcciones de memoria\n");
+			printf("\n*****Se ha acabado de leer las direcciones de memoria*****");
+			printf("\nNumero de accesos: %d Numero de fallos: %d Tiempo medio de acceso: %f", numAccesos, numFallos, ((float)tiempoGlobal/(float)numAccesos));
+			printf("\nTexto leido: ");
 			for(i = 0; i < cantidad; i++){
 				printf("%c", texto[i]);
 			}
@@ -63,11 +67,14 @@ int main(int argc, char** argv){
 		}else{
 			if (cargadoEnCache(siguienteAcceso, cache)==0){
 				falloCache(siguienteAcceso,cache,ram);
+				numAccesos++;
 			}
 			texto[cantidad] = aciertoCache(siguienteAcceso, cache, ram);
 			cantidad++;
-			sleep(2);
+			numAccesos++;
+			imprimirCache(cache);
 		}
+		sleep(2);
 	}
 	return 0;
 }
@@ -81,20 +88,13 @@ void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAcceso
 	
 	//Inicializamos la cache
 	for(i=0; i < 4; i++){
-		printf("\nEtiqueta cambiada");
 		cache[i].ETQ = 0xFF;
 		for(j = 0; j < 8; j++){
-			printf("\nDato cambiado");
 			cache[i].Datos[j] = 0;
 		}
 	}
-	printf("\nAccesos iniciados");
-	for(i=0; i < 4 ; i++){
-		printf("\n ETIQ: %x", cache[i].ETQ);
-		for(j=0; j < 8; j++){
-			printf(" Dato: %d",cache[i].Datos[j]);  
-		}
-	}
+	printf("\nEstado inicial de la cache");
+	imprimirCache(cache);
 	
 }
 
@@ -174,10 +174,10 @@ char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 void imprimirCache(T_LINEA_CACHE *cache){
 	int i;
 	for(i = 0; i<4; i++){
-		printf("ETQ: %x",cache[i].ETQ);
+		printf("\nETQ: %02X \t Datos:",cache[i].ETQ);
 		for(int j = 7; j>=0;j--){
-			printf("Datos: %x", cache[i].Datos[j]);
-		}
-		printf("\n");		
+			printf(" %02X", cache[i].Datos[j]);
+		}		
 	}
+	printf("\n");
 }
