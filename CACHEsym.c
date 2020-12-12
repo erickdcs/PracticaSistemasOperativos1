@@ -34,7 +34,6 @@ int main(int argc, char** argv){
 	FILE* fAccesos;
 	char texto[100];
 	int cantidad = 0;
-	int numAccesos = 0;
 	int i;
 	
 	//Abrimos los ficheros en formato lectura
@@ -58,7 +57,7 @@ int main(int argc, char** argv){
 		
 		if(siguienteAcceso == -1){
 			printf("\n*****Se ha acabado de leer las direcciones de memoria*****");
-			printf("\nNumero de accesos: %d Numero de fallos: %d Tiempo medio de acceso: %f", numAccesos, numFallos, ((float)tiempoGlobal/(float)numAccesos));
+			printf("\nNumero de accesos: %d Numero de fallos: %d Tiempo medio de acceso: %f", cantidad, numFallos, ((float)tiempoGlobal/(float)cantidad));
 			printf("\nTexto leido: ");
 			for(i = 0; i < cantidad; i++){
 				printf("%c", texto[i]);
@@ -67,11 +66,9 @@ int main(int argc, char** argv){
 		}else{
 			if (cargadoEnCache(siguienteAcceso, cache)==0){
 				falloCache(siguienteAcceso,cache,ram);
-				numAccesos++;
 			}
 			texto[cantidad] = aciertoCache(siguienteAcceso, cache, ram);
 			cantidad++;
-			numAccesos++;
 			imprimirCache(cache);
 		}
 		sleep(2);
@@ -113,16 +110,16 @@ short int accesoMemoria(FILE* fAccesos){
 }
 
 short int numLinea(short int direccion){ //Mantiene exclusivamente los bits de la linea, después los desplaza para que ocupen los bits de menor peso
-	return ((direccion & 0b0001100000) >> 5);
+	return ((direccion & 0b0000011000) >> 3);
 }
 short int etiqueta(short int direccion){ //Mantiene exclusivamente los bits de la etiqueta, después los desplaza para que ocupen los bits de menor peso
-	return ((direccion & 0b1110000000) >> 7);
+	return ((direccion & 0b1111100000) >> 5);
 }
 short int palabra(short int direccion){ //Mantiene exclusivamente los bits de la palabra, después los desplaza para que ocupen los bits de menor peso
-	return (direccion & 0b0000011111);
+	return (direccion & 0b0000000111);
 }
 short int numBloque(short int direccion){
-	return ((direccion & 0b1111100000) >> 5);
+	return ((direccion & 0b1111111000) >> 3);
 }
 int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
 		tiempoGlobal++;
@@ -163,7 +160,7 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	printf("\nCargando el bloque %02X en la linea %02X", bloque, linea);
 	cache[linea].ETQ = etiqueta(direccion);
 	for (i = 0; i < 8; i++){
-		cache[linea].Datos[i] = ram[bloque+i];
+		cache[linea].Datos[i] = ram[bloque*8+i];
 	}
 }
 char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
