@@ -67,7 +67,7 @@ int main(int argc, char** argv){
 			if (cargadoEnCache(siguienteAcceso, cache)==0){
 				falloCache(siguienteAcceso,cache,ram);
 			}
-			texto[cantidad] = aciertoCache(siguienteAcceso, cache, ram);
+			texto[cantidad] = aciertoCache(siguienteAcceso, cache);
 			cantidad++;
 			imprimirCache(cache);
 		}
