@@ -19,7 +19,7 @@ short int palabra(short int direccion);
 short int numBloque(short int direccion);
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
-char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
+char aciertoCache(short int direccion, T_LINEA_CACHE* cache);
 void imprimirCache(T_LINEA_CACHE *cache);
 
 unsigned int tiempoGlobal = 0;
@@ -163,10 +163,12 @@ void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 		cache[linea].Datos[i] = ram[bloque*8+i];
 	}
 }
-char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
+char aciertoCache(short int direccion, T_LINEA_CACHE* cache){
+	short int linea = numLinea(direccion);
+	short int numPalabra = palabra(direccion);
 	printf("\nT: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
-	printf(" linea %02X palabra %02X DATO %02X", numLinea(direccion), palabra(direccion), ram[direccion]);
-	return ram[direccion];
+	printf(" linea %02X palabra %02X DATO %02X", linea, palabra, cache[linea].Datos[numPalabra]);
+	return cache[linea].Datos[numPalabra];
 }
 void imprimirCache(T_LINEA_CACHE *cache){
 	int i;
