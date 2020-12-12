@@ -122,7 +122,7 @@ short int numBloque(short int direccion){
 	return ((direccion & 0b1111111000) >> 3);
 }
 int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
-		tiempoGlobal++;
+	tiempoGlobal++;
 	if(cache[numLinea(direccion)].ETQ == etiqueta(direccion)){ //Comprueba si la etiqueta de la direccion se corresponde con la etiqueta cargada en 
 		return 1;											  //la linea correspondiente de la cache
 	}else{
@@ -167,7 +167,7 @@ char aciertoCache(short int direccion, T_LINEA_CACHE* cache){
 	short int linea = numLinea(direccion);
 	short int numPalabra = palabra(direccion);
 	printf("\nT: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
-	printf(" linea %02X palabra %02X DATO %02X", linea, palabra, cache[linea].Datos[numPalabra]);
+	printf(" linea %02X palabra %02X DATO %02X", linea, numPalabra, cache[linea].Datos[numPalabra]);
 	return cache[linea].Datos[numPalabra];
 }
 void imprimirCache(T_LINEA_CACHE *cache){
