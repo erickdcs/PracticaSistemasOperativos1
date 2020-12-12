@@ -10,8 +10,8 @@ typedef struct {
  short int Datos[8];
 } T_LINEA_CACHE;
 
-void startUp(T_LINEA_CACHE* cache, char* ram, FILE* fRAM, FILE* fAccesos);
-void startRAM(FILE* f, char* ram);
+void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAccesos);
+unsigned char* startRAM(FILE* f);
 short int accesoMemoria(FILE* f);
 short int numLinea(short int direccion);
 short int etiqueta(short int direccion);
@@ -27,7 +27,7 @@ unsigned int numFallos = 0;
 int main(int argc, char** argv){
 	
 	T_LINEA_CACHE cache[4];
-	char ram[1024];
+	unsigned char ram[1024];
 	short int siguienteAcceso = 0;
 	FILE* fRAM;
 	FILE* fAccesos;
@@ -35,10 +35,9 @@ int main(int argc, char** argv){
 	int cantidad = 0;
 	
 	startUp(cache, ram, fRAM, fAccesos);
-	printf("\nMemoria iniciada %s y esto es la ram", ram);
+	printf("\nMemoria iniciada");
 	fAccesos = fopen("accesos_memoria.txt", "r");
-	printf("%c", ram[3]);
-	
+	printf("\n\nhola :%c\n\n",ram[1]);
 	while(siguienteAcceso!=-1){
 		siguienteAcceso = accesoMemoria(fAccesos);
 		
@@ -57,7 +56,7 @@ int main(int argc, char** argv){
 	return 0;
 }
 
-void startUp(T_LINEA_CACHE* cache, char* ram, FILE* fRAM, FILE* fAccesos){
+void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAccesos){
 	int i;
 	int j;
 	
@@ -78,7 +77,7 @@ void startUp(T_LINEA_CACHE* cache, char* ram, FILE* fRAM, FILE* fAccesos){
 	}
 	
 	//Inicializamos la RAM
-	startRAM(fRAM, ram);
+	ram = startRAM(fRAM);
 	
 	//Inicializamos la cache
 	for(i=0; i < 4; i++){
@@ -133,7 +132,9 @@ int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
 		return 0;
 	}
 }
-void startRAM(FILE *fichero, char* ram){
+unsigned char* startRAM(FILE *fichero){
+	unsigned char* ram;
+	unsigned char linea[1024];	//	array de char donde se almacenara la informacion
 	fichero = fopen("RAM.bin", "r");	// abrimos el fichero
 	int cont = 0;	// contador para avanzar la posicion del array
 	char c = 0;	//char auxiliar
@@ -145,13 +146,16 @@ void startRAM(FILE *fichero, char* ram){
 		
 		if(c != '\r' && c != '\0')
 		{
-			ram[cont] = c;
+			linea[cont] = c;
 			cont++;
 		}
+		printf("%d: %c",cont, c);
 		c =getc(fichero);
 	}
 	
 	fclose(fichero);
+	ram = linea;
+	return linea;
 }
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	numFallos++;
@@ -171,6 +175,15 @@ char aciertoCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	sleep(2);
 	printf("T: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
 	printf(" linea %02X palabra %02X DATO %02X", numLinea(direccion), palabra(direccion), ram[direccion]);
-	printf("%c", ram[direccion]);
 	return ram[direccion];
+}
+void imprimirCache(T_LINEA_CACHE *cache){
+	int i;
+	for(i = 0; i<4; i++){
+		printf("ETQ: %x",cache[i].ETQ);
+		for(int j = 7; j>=0;j--){
+			printf("Datos: %x", cache[i].Datos[j]);
+		}
+		printf("\n");		
+	}
 }
