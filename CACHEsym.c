@@ -9,21 +9,31 @@ typedef struct {
  short int ETQ;
  short int Datos[8];
 } T_LINEA_CACHE;
-
+//Esta funcion inicializa los valores de las variables de T_LINEA_CACHE, y lee el fichero RAM.bin para almacenar los caracteres del fichero en la variable RAM
 void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAccesos);
+
+//Funcion que ejecuta la lectura del fichero RAM.bin, y almacena los caracteres en la varaible RAM
 void startRAM(FILE* f, char* ram);
+
+//Esta funcion retorna el valor de la direccion de memoria en hexagecimal
 short int accesoMemoria(FILE* f);
+
 short int numLinea(short int direccion);
 short int etiqueta(short int direccion);
 short int palabra(short int direccion);
 short int numBloque(short int direccion);
+
+//Funcion que comprueba que la etiqueta de la direccion se corresponde con la etiqueta cargada en la linea correspondiente de la cache 
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
+
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
 char aciertoCache(short int direccion, T_LINEA_CACHE* cache);
+
+//Esta funcion imprime el array de structs de cache
 void imprimirCache(T_LINEA_CACHE *cache);
 
-unsigned int tiempoGlobal = 0;
-unsigned int numFallos = 0;
+unsigned int tiempoGlobal = 0;	//Lleva la cuenta del "tiempo" que tarda en ejecutarse
+unsigned int numFallos = 0;		//Cuenta en numero de fallos que se producen
 
 int main(int argc, char** argv){
 	
@@ -50,12 +60,13 @@ int main(int argc, char** argv){
 		exit(-1);
 	}
 	
-	startUp(cache, ram, fRAM, fAccesos);
+	startUp(cache, ram, fRAM, fAccesos);//Inicializamos las variables de cache, y almacenamos los valores de RAM
 	
 	while(siguienteAcceso!=-1){
-		siguienteAcceso = accesoMemoria(fAccesos);
+		siguienteAcceso = accesoMemoria(fAccesos); //cargamos el valor de la direccion, en caso de encontrase al final del fichero retornara -1
 		
-		if(siguienteAcceso == -1){
+		//Comprobamos si se encuentra al final del fichero
+		if(siguienteAcceso == -1){	//Si se encuentra al final del fichero mostramos los datos pedidos por pantalla
 			printf("\n*****Se ha acabado de leer las direcciones de memoria*****");
 			printf("\nNumero de accesos: %d Numero de fallos: %d Tiempo medio de acceso: %f", cantidad, numFallos, ((float)tiempoGlobal/(float)cantidad));
 			printf("\nTexto leido: ");
@@ -63,13 +74,15 @@ int main(int argc, char** argv){
 				printf("%c", texto[i]);
 			}
 			return 0;
-		}else{
+		}else{	//Sino esta al final del fichero
+			
+			//Comprobamos que la etiqueta de la direccion se corresponde con la etiqueta cargada en la linea correspondiente de la cache
 			if (cargadoEnCache(siguienteAcceso, cache)==0){
 				falloCache(siguienteAcceso,cache,ram);
 			}
 			texto[cantidad] = aciertoCache(siguienteAcceso, cache);
 			cantidad++;
-			imprimirCache(cache);
+			imprimirCache(cache);	//Imprime la cache
 		}
 		sleep(2);
 	}
@@ -94,7 +107,7 @@ void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAcceso
 	imprimirCache(cache);
 	
 }
-
+//Esta funcion almacena los 4 primeros bytes que se encuentren en el fichero abierto en formato hexagecimal en la variable direccion, y finalmente retorna ese valor
 short int accesoMemoria(FILE* fAccesos){
 	short int direccion = 0;
 	char aux[4] = "\n";
@@ -135,7 +148,7 @@ void startRAM(FILE *fichero, char* ram){
 	char c = 0;	//char auxiliar
 	c = getc(fichero);// cargamos el primer caracter en c
 
-	/// este bucle lee caracter por caracter hasta que se llegue al final del fichero
+	// este bucle lee caracter por caracter hasta que se llegue al final del fichero
 	while(!feof(fichero))
 	{
 		
@@ -149,6 +162,7 @@ void startRAM(FILE *fichero, char* ram){
 	
 	fclose(fichero);
 }
+
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
 	numFallos++;
 	short int linea = numLinea(direccion);
@@ -172,6 +186,7 @@ char aciertoCache(short int direccion, T_LINEA_CACHE* cache){
 }
 void imprimirCache(T_LINEA_CACHE *cache){
 	int i;
+	//Bucle que imprime la cache los datos de cada etiqueta de la cache
 	for(i = 0; i<4; i++){
 		printf("\nETQ: %02X \t Datos:",cache[i].ETQ);
 		for(int j = 7; j>=0;j--){
