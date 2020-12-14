@@ -5,10 +5,12 @@
 #include <math.h>
 #include <stdbool.h>
 #include <unistd.h>
+
 typedef struct {
  short int ETQ;
  short int Datos[8];
 } T_LINEA_CACHE;
+
 //Esta funcion inicializa los valores de las variables de T_LINEA_CACHE, y lee el fichero RAM.bin para almacenar los caracteres del fichero en la variable RAM
 void startUp(T_LINEA_CACHE* cache, unsigned char* ram, FILE* fRAM, FILE* fAccesos);
 
@@ -18,6 +20,7 @@ void startRAM(FILE* f, char* ram);
 //Esta funcion retorna el valor de la direccion de memoria en hexagecimal
 short int accesoMemoria(FILE* f);
 
+//Funciones para obtener datos de las direcciones de memoria
 short int numLinea(short int direccion);
 short int etiqueta(short int direccion);
 short int palabra(short int direccion);
@@ -26,6 +29,7 @@ short int numBloque(short int direccion);
 //Funcion que comprueba que la etiqueta de la direccion se corresponde con la etiqueta cargada en la linea correspondiente de la cache 
 int cargadoEnCache(short int direccion, T_LINEA_CACHE cache[4]);
 
+//Funciones para gestionar los aciertos y los fallos de cache
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram);
 char aciertoCache(short int direccion, T_LINEA_CACHE* cache);
 
@@ -128,10 +132,10 @@ short int numLinea(short int direccion){ //Mantiene exclusivamente los bits de l
 short int etiqueta(short int direccion){ //Mantiene exclusivamente los bits de la etiqueta, después los desplaza para que ocupen los bits de menor peso
 	return ((direccion & 0b1111100000) >> 5);
 }
-short int palabra(short int direccion){ //Mantiene exclusivamente los bits de la palabra, después los desplaza para que ocupen los bits de menor peso
+short int palabra(short int direccion){ //Mantiene exclusivamente los bits de la palabra
 	return (direccion & 0b0000000111);
 }
-short int numBloque(short int direccion){
+short int numBloque(short int direccion){//Mantiene exclusivamente los bits del bloque, después los desplaza para que ocupen los bits de menor peso
 	return ((direccion & 0b1111111000) >> 3);
 }
 int cargadoEnCache(short int direccion, T_LINEA_CACHE* cache){
@@ -164,17 +168,17 @@ void startRAM(FILE *fichero, char* ram){
 }
 
 void falloCache(short int direccion, T_LINEA_CACHE* cache, char* ram){
-	numFallos++;
-	short int linea = numLinea(direccion);
-	short int bloque = numBloque(direccion);
+	numFallos++; //Aumenta el numero de fallos
+	short int linea = numLinea(direccion); //Obtiene una sola vez el numero de linea
+	short int bloque = numBloque(direccion); //Obtiene una sola vez el numero de bloque
 	int i;
 	printf("\nT: %d, Fallo de CACHE %d, ADDR %04X ETQ %X", tiempoGlobal, numFallos, direccion,etiqueta(direccion));
-	printf(" linea %02X palabra %02X bloque %02X", linea, palabra(direccion), bloque);
-	tiempoGlobal+=10;
+	printf(" linea %02X palabra %02X bloque %02X", linea, palabra(direccion), bloque); //Imprime los datos
+	tiempoGlobal+=10; //Simula el tiempo de acceso a la ram
 	printf("\nCargando el bloque %02X en la linea %02X", bloque, linea);
-	cache[linea].ETQ = etiqueta(direccion);
-	for (i = 0; i < 8; i++){
-		cache[linea].Datos[i] = ram[bloque*8+i];
+	cache[linea].ETQ = etiqueta(direccion); //Carga la etiqueta en la cache
+	for (i = 0; i < 8; i++){ //Actualiza los datos de la cache
+		cache[linea].Datos[i] = ram[bloque*8+i]; //Los datos comienzan en la direccion del bloque (multiplicado por su tamaño unitario)
 	}
 }
 char aciertoCache(short int direccion, T_LINEA_CACHE* cache){
@@ -182,7 +186,7 @@ char aciertoCache(short int direccion, T_LINEA_CACHE* cache){
 	short int numPalabra = palabra(direccion);
 	printf("\nT: %d, Acierto de CACHE, ADDR %04X ETQ %X", tiempoGlobal, direccion, etiqueta(direccion));
 	printf(" linea %02X palabra %02X DATO %02X", linea, numPalabra, cache[linea].Datos[numPalabra]);
-	return cache[linea].Datos[numPalabra];
+	return cache[linea].Datos[numPalabra]; //Devuelve el caracter leido desde la cache
 }
 void imprimirCache(T_LINEA_CACHE *cache){
 	int i;
